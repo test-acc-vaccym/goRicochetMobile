@@ -1,3 +1,5 @@
+// +build android
+
 package go_ricochet_mobile
 
 import (
@@ -11,5 +13,6 @@ import (
 )
 
 type InitActivity struct {
-
+	app.AppCompatActivity
+	binding databinding.ActivityInitBinding
 }
