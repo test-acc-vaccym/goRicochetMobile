@@ -24,7 +24,8 @@ func EchoBot(privateKeyData string) {
 
 	echobot := new(application.RicochetApplication)
 
-	l, err := application.SetupOnion("127.0.0.1:9051", "", privateKey, 9878)
+	l, err := application.SetupOnion("127.0.0.1:9051", "tcp4","", privateKey, 9878)
+	//l, err := application.SetupOnion("/data/data/org.torproject.android/app_bin/control.txt", "unix","", privateKey, 9878)
 
 	if err != nil {
 		log.Fatalf("error setting up onion service: %v", err)
