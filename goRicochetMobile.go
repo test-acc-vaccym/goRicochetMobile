@@ -4,6 +4,8 @@ import (
 	"github.com/s-rah/go-ricochet/application"
 	"github.com/s-rah/go-ricochet/utils"
 	"log"
+//	"time"
+	"net/http"
 	"time"
 )
 
@@ -15,7 +17,15 @@ func GeneratePrivateKey() (string, error) {
 	return utils.PrivateKeyToString(privateKey), nil
 }
 
-func EchoBot(privateKeyData string) {
+func TestNet() (ok bool, ex error) {
+	_, err := http.Get("http://golang.org/")
+	if err != nil {
+		return false, err
+	}
+	return true, nil
+}
+
+func EchoBot(privateKeyData string)  {
 	privateKey, err := utils.ParsePrivateKey([]byte(privateKeyData))
 
 	if err != nil {
@@ -24,6 +34,7 @@ func EchoBot(privateKeyData string) {
 
 	echobot := new(application.RicochetApplication)
 
+	log.Println("SetupOnion()...")
 	l, err := application.SetupOnion("127.0.0.1:9051", "tcp4","", privateKey, 9878)
 	//l, err := application.SetupOnion("/data/data/org.torproject.android/app_bin/control.txt", "unix","", privateKey, 9878)
 
