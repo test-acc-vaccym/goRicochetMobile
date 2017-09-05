@@ -16,6 +16,10 @@ func GeneratePrivateKey() (string, error) {
 	return utils.PrivateKeyToString(privateKey), nil
 }
 
+func GetOnionAddress(privateKey string) string {
+	return utils.GetOnionAddr(privateKey)
+}
+
 func TestNet() (ok bool, ex error) {
 	_, err := http.Get("http://golang.org/")
 	if err != nil {
@@ -30,7 +34,6 @@ func EchoBot(privateKeyData string)  {
 	if err != nil {
 		log.Fatal("error parsing private key: %v", err)
 	}
-
 	echobot := new(application.RicochetApplication)
 
 	log.Println("SetupOnion()...")
