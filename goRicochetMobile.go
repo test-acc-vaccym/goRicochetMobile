@@ -6,9 +6,9 @@ import (
 	"log"
 	"net/http"
 	"time"
-	"github.com/s-rah/go-ricochet/connection"
 	"github.com/yawning/bulb/utils/pkcs1"
 	"crypto/rsa"
+	"github.com/s-rah/go-ricochet/channels"
 )
 
 func GeneratePrivateKey() (string, error) {
@@ -37,13 +37,30 @@ func TestNet() (ok bool, ex error) {
 	return true, nil
 }
 
-type ODClient struct {
-	connection.AutoConnectionHandler
-	messages chan string
-	deviceName string
-	deviceLevel int
-	batteryLevel string
+func ODClientConnect(privateKeyData string, serverAddr string)  {
+	privateKey, err := utils.ParsePrivateKey([]byte(privateKeyData))
+	if err != nil {
+		log.Fatal("error parsing private key: %v", err)
+	}
+
+	odClient := new(ODClient)
+	odClient.Init(privateKey, serverAddr)
+
+	odClient.RegisterChannelHandler("im.ricochet.contact.request", func() channels.Handler {
+		contact := new(channels.ContactRequestChannel)
+		contact.Handler = odClient
+		return contact
+	})
+
+	odClient.RegisterChannelHandler("im.ricochet.chat", func() channels.Handler {
+		chat := new(channels.ChatChannel)
+		chat.Handler = odClient
+		return chat
+	})
+
+
 }
+
 
 /******** Testing by standing up an echobot ******/
 
