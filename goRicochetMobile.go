@@ -38,6 +38,7 @@ func TestNet() (ok bool, ex error) {
 }
 
 func ODClientConnect(privateKey string, serverAddr string) error {
+	log.Println("ODClientConnect(" + serverAddr + ")")
 	odClient := new(ODClient.ODClient)
 	err := odClient.Connect(privateKey, serverAddr)
 	return err
