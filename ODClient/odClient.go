@@ -11,6 +11,7 @@ import (
 
 type ODClient struct {
 	connection.AutoConnectionHandler
+	connection *connection.Connection
 	recvMessages chan string
 	sendMessages chan string
 	deviceName   string
@@ -28,12 +29,14 @@ func (odClient *ODClient) Connect(privateKeyData string, serverAddr string) erro
 	odClient.Init(privateKey, serverAddr)
 
 	odClient.RegisterChannelHandler("im.ricochet.contact.request", func() channels.Handler {
+		log.Println("handler for contact.request")
 		contact := new(channels.ContactRequestChannel)
 		contact.Handler = odClient
 		return contact
 	})
 
 	odClient.RegisterChannelHandler("im.ricochet.chat", func() channels.Handler {
+		log.Println("handler for chat")
 		chat := new(channels.ChatChannel)
 		chat.Handler = odClient
 		return chat
@@ -43,20 +46,76 @@ func (odClient *ODClient) Connect(privateKeyData string, serverAddr string) erro
 	odClient.sendMessages = make(chan string)
 
 	log.Println("ODClient connecting...")
-	conn, err := goricochet.Open(serverAddr)
+	odClient.connection, err = goricochet.Open(serverAddr)
 	if err != nil {
 		log.Println("Error connecting %v", err)
 		return err
 	}
 	log.Println("ODCleint connected!")
-	_, err = connection.HandleOutboundConnection(conn).ProcessAuthAsClient(privateKey)
+	log.Println("starting auth...")
+	known, err := connection.HandleOutboundConnection(odClient.connection).ProcessAuthAsClient(privateKey)
 	if err != nil {
 		log.Println("Error handling auth: %v", err)
 		return err
 	}
-	log.Println("ODClient: Authenticated!")
+
+	log.Println("go Process")
+	go odClient.connection.Process(odClient)
+
+	if !known {
+		err := odClient.connection.RequestOpenChannel("im.ricochet.contact.request", odClient)
+		if err != nil {
+			log.Printf("could not contact %s", err)
+		}
+	}
+
+	log.Println("ODClient: Authenticated")
+	//odClient.connection.RequestOpenChannel("im.ricochet.contact.request", odClient)
+
+	log.Println("go")
+
+	log.Println("RequestOpenChanel chat")
+	err = odClient.connection.RequestOpenChannel("im.ricochet.chat", odClient)
+	if err != nil {
+		log.Println("Error: " + err.Error())
+	}
+
+	log.Println("sending greeting message")
+	odClient.SendMessage("hello from the client")
+
+
 
 	return nil
+}
+
+/*func (odClient *ODClient) RequestContact() {
+	odClient.connection.Do(func() error {
+		channel := odClient.connection.Channel("im.ricochet.contact.request", channels.Outbound)
+		if channel != nil {
+			contactRequestChannel, ok := (*channel.Handler).(*channels.ContactRequestChannel)
+			if ok {
+				//contactRequestChannel.Handler
+			}
+		}else {
+			log.Println("ERROR: failed to find chat channel")
+		}
+		return nil
+	})
+}*/
+
+func (odClient *ODClient) SendMessage(message string) {
+	odClient.connection.Do(func() error {
+		channel := odClient.connection.Channel("im.ricochet.chat", channels.Outbound)
+		if channel != nil {
+			chatchannel, ok := (*channel.Handler).(*channels.ChatChannel)
+			if ok {
+				chatchannel.SendMessage(message)
+			}
+		}else {
+			log.Println("ERROR: failed to find chat channel")
+		}
+		return nil
+	})
 }
 
 /************* Chat Channel Handler ********/
@@ -76,7 +135,7 @@ func (odc *ODClient) ChatMessageAck(messageID uint32) {
 
 // GetContactDetails is purposely empty
 func (odc *ODClient) GetContactDetails() (string, string) {
-	return "", ""
+	return "AndroidOD Client", ""
 }
 
 // ContactRequest denies any contact request.
