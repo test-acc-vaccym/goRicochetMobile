@@ -13,7 +13,6 @@ type ODClient struct {
 	connection.AutoConnectionHandler
 	connection *connection.Connection
 	recvMessages chan string
-	sendMessages chan string
 	deviceName   string
 	deviceLevel  int
 	batteryLevel string
@@ -43,7 +42,6 @@ func (odClient *ODClient) Connect(privateKeyData string, serverAddr string) erro
 	})
 
 	odClient.recvMessages = make(chan string)
-	odClient.sendMessages = make(chan string)
 
 	log.Println("ODClient connecting...")
 	odClient.connection, err = goricochet.Open(serverAddr)
@@ -60,6 +58,7 @@ func (odClient *ODClient) Connect(privateKeyData string, serverAddr string) erro
 	}
 
 	log.Println("go Process")
+	// TODO: end with breakChannel
 	go odClient.connection.Process(odClient)
 
 	if !known {
@@ -70,7 +69,6 @@ func (odClient *ODClient) Connect(privateKeyData string, serverAddr string) erro
 	}
 
 	log.Println("ODClient: Authenticated")
-	//odClient.connection.RequestOpenChannel("im.ricochet.contact.request", odClient)
 
 	log.Println("go")
 
@@ -80,10 +78,8 @@ func (odClient *ODClient) Connect(privateKeyData string, serverAddr string) erro
 		log.Println("Error: " + err.Error())
 	}
 
-	log.Println("sending greeting message")
-	odClient.SendMessage("hello from the client")
-
-
+	//log.Println("sending greeting message")
+	//odClient.SendMessage("hello from the client")
 
 	return nil
 }
@@ -116,6 +112,11 @@ func (odClient *ODClient) SendMessage(message string) {
 		}
 		return nil
 	})
+}
+
+func (odClient *ODClient) GetMessage() string {
+	message := <-odClient.recvMessages
+	return message
 }
 
 /************* Chat Channel Handler ********/

@@ -11,6 +11,10 @@ import (
 	"github.com/dballard/goRicochetMobile/ODClient"
 )
 
+var (
+ odClient *ODClient.ODClient
+)
+
 func GeneratePrivateKey() (string, error) {
 	privateKey, err := utils.GeneratePrivateKey()
 	if err != nil {
@@ -29,6 +33,21 @@ func GetOnionAddress(privateKey string) string {
 	return addr
 }
 
+func ODClientConnect(privateKey string, serverAddr string) error {
+	log.Println("ODClientConnect(" + serverAddr + ")")
+	odClient = new(ODClient.ODClient)
+	err := odClient.Connect(privateKey, serverAddr)
+	return err
+}
+
+func GetDeviceName() string {
+	odClient.SendMessage("/name")
+	name := odClient.GetMessage()
+	return name
+}
+
+/******** Testing by standing up an echobot ******/
+
 func TestNet() (ok bool, ex error) {
 	_, err := http.Get("http://golang.org/")
 	if err != nil {
@@ -36,15 +55,6 @@ func TestNet() (ok bool, ex error) {
 	}
 	return true, nil
 }
-
-func ODClientConnect(privateKey string, serverAddr string) error {
-	log.Println("ODClientConnect(" + serverAddr + ")")
-	odClient := new(ODClient.ODClient)
-	err := odClient.Connect(privateKey, serverAddr)
-	return err
-}
-
-/******** Testing by standing up an echobot ******/
 
 func EchoBot(privateKeyData string)  {
 	privateKey, err := utils.ParsePrivateKey([]byte(privateKeyData))
