@@ -9,10 +9,15 @@ import (
 	"github.com/yawning/bulb/utils/pkcs1"
 	"crypto/rsa"
 	"github.com/dballard/goRicochetMobile/ODClient"
+	"strconv"
 )
 
 var (
- odClient *ODClient.ODClient
+	// Downsampling array from https://git.mascherari.press/oniondildonics/client/src/master/main.go
+	// moddified
+	levelArr = []int{1, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6}
+
+	odClient *ODClient.ODClient
 )
 
 func GeneratePrivateKey() (string, error) {
@@ -44,6 +49,26 @@ func GetDeviceName() string {
 	odClient.SendMessage("/name")
 	name := odClient.GetMessage()
 	return name
+}
+
+func GetBatteryLevel() string {
+	odClient.SendMessage("/battery")
+	batteryLevel := odClient.GetMessage()
+	return batteryLevel
+}
+
+func GetVibeLevel() int {
+	odClient.SendMessage("/level")
+	level, err := strconv.Atoi(odClient.GetMessage())
+	if err != nil {
+		// TODO: don't swallow errors
+		return 0
+	}
+	return levelArr[level] // not bounds checking...
+}
+
+func SetVibeLevel(newVibeLevel int) {
+	odClient.SendMessage("/level " + strconv.Itoa(newVibeLevel))
 }
 
 /******** Testing by standing up an echobot ******/
