@@ -70,8 +70,6 @@ func (odClient *ODClient) Connect(privateKeyData string, serverAddr string) erro
 
 	log.Println("ODClient: Authenticated")
 
-	log.Println("go")
-
 	log.Println("RequestOpenChanel chat")
 	err = odClient.connection.RequestOpenChannel("im.ricochet.chat", odClient)
 	if err != nil {
@@ -82,6 +80,13 @@ func (odClient *ODClient) Connect(privateKeyData string, serverAddr string) erro
 	//odClient.SendMessage("hello from the client")
 
 	return nil
+}
+
+func (odClient *ODClient) Disconnect() {
+	log.Println("Break()...")
+	odClient.connection.Break()
+	log.Println("Conn.Close()...")
+	odClient.connection.Conn.Close()
 }
 
 /*func (odClient *ODClient) RequestContact() {

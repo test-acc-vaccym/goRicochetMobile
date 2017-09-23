@@ -17,7 +17,7 @@ var (
 	// moddified
 	levelArr = []int{1, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6}
 
-	odClient *ODClient.ODClient
+	odClient *ODClient.ODClient = nil
 )
 
 func GeneratePrivateKey() (string, error) {
@@ -43,6 +43,12 @@ func ODClientConnect(privateKey string, serverAddr string) error {
 	odClient = new(ODClient.ODClient)
 	err := odClient.Connect(privateKey, serverAddr)
 	return err
+}
+
+func ODClientDisconnect() {
+	log.Println("ODClientDisconnect()")
+	odClient.Disconnect()
+	odClient = nil
 }
 
 func GetDeviceName() string {
