@@ -39,7 +39,7 @@ func GetOnionAddress(privateKey string) string {
 }
 
 func ODClientConnect(privateKey string, serverAddr string) error {
-	log.Println("ODClientConnect(" + serverAddr + ")")
+	log.Println("ODClientConnect()")
 	odClient = new(ODClient.ODClient)
 	err := odClient.Connect(privateKey, serverAddr)
 	return err

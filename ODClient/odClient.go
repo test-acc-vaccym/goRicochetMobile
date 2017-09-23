@@ -50,7 +50,7 @@ func (odClient *ODClient) Connect(privateKeyData string, serverAddr string) erro
 		return err
 	}
 	log.Println("ODCleint connected!")
-	log.Println("starting auth...")
+	log.Println("Starting auth...")
 	known, err := connection.HandleOutboundConnection(odClient.connection).ProcessAuthAsClient(privateKey)
 	if err != nil {
 		log.Println("Error handling auth: %v", err)
@@ -58,13 +58,12 @@ func (odClient *ODClient) Connect(privateKeyData string, serverAddr string) erro
 	}
 
 	log.Println("go Process")
-	// TODO: end with breakChannel
 	go odClient.connection.Process(odClient)
 
 	if !known {
 		err := odClient.connection.RequestOpenChannel("im.ricochet.contact.request", odClient)
 		if err != nil {
-			log.Printf("could not contact %s", err)
+			log.Printf("Could not auth with server", err)
 		}
 	}
 
@@ -76,9 +75,7 @@ func (odClient *ODClient) Connect(privateKeyData string, serverAddr string) erro
 		log.Println("Error: " + err.Error())
 	}
 
-	//log.Println("sending greeting message")
-	//odClient.SendMessage("hello from the client")
-
+	log.Println("Connection fully initiated, chat channel open!")
 	return nil
 }
 
@@ -128,7 +125,7 @@ func (odClient *ODClient) GetMessage() string {
 
 // ChatMessage passes the response to recvMessages.
 func (odc *ODClient) ChatMessage(messageID uint32, when time.Time, message string) bool {
-	log.Printf("Received Message: %s", message)
+	//log.Printf("Received Message: %s", message)
 	odc.recvMessages <- message
 	return true
 }
