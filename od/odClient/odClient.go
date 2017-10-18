@@ -1,4 +1,4 @@
-package ODClient
+package odClient
 
 import (
 	"github.com/s-rah/go-ricochet/connection"

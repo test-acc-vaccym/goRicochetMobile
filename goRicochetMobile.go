@@ -8,17 +8,9 @@ import (
 	"time"
 	"github.com/yawning/bulb/utils/pkcs1"
 	"crypto/rsa"
-	"github.com/dballard/goRicochetMobile/ODClient"
-	"strconv"
 )
 
-var (
-	// Downsampling array from https://git.mascherari.press/oniondildonics/client/src/master/main.go
-	// moddified
-	levelArr = []int{1, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6}
 
-	odClient *ODClient.ODClient = nil
-)
 
 func GeneratePrivateKey() (string, error) {
 	privateKey, err := utils.GeneratePrivateKey()
@@ -38,44 +30,7 @@ func GetOnionAddress(privateKey string) string {
 	return addr
 }
 
-func ODClientConnect(privateKey string, serverAddr string) error {
-	log.Println("ODClientConnect()")
-	odClient = new(ODClient.ODClient)
-	err := odClient.Connect(privateKey, serverAddr)
-	return err
-}
 
-func ODClientDisconnect() {
-	log.Println("ODClientDisconnect()")
-	odClient.Disconnect()
-	odClient = nil
-}
-
-func GetDeviceName() string {
-	odClient.SendMessage("/name")
-	name := odClient.GetMessage()
-	return name
-}
-
-func GetBatteryLevel() string {
-	odClient.SendMessage("/battery")
-	batteryLevel := odClient.GetMessage()
-	return batteryLevel
-}
-
-func GetVibeLevel() int {
-	odClient.SendMessage("/level")
-	level, err := strconv.Atoi(odClient.GetMessage())
-	if err != nil {
-		// TODO: don't swallow errors
-		return 0
-	}
-	return levelArr[level] // not bounds checking...
-}
-
-func SetVibeLevel(newVibeLevel int) {
-	odClient.SendMessage("/level " + strconv.Itoa(newVibeLevel))
-}
 
 /******** Testing by standing up an echobot ******/
 
@@ -100,7 +55,7 @@ func EchoBot(privateKeyData string)  {
 	}
 
 	echobot := new(application.RicochetApplication)
-	echobot.Init(privateKey, new(application.RejectAllContactManager))
+	echobot.Init(privateKey, new(application.AcceptAllContactManager))
 
 	echobot.OnChatMessage(func(rai *application.RicochetApplicationInstance, id uint32, timestamp time.Time, message string) {
 		log.Printf("message from %v - %v", rai.RemoteHostname, message)
