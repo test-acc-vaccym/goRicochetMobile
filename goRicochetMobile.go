@@ -8,6 +8,13 @@ import (
 	"time"
 	"github.com/yawning/bulb/utils/pkcs1"
 	"crypto/rsa"
+	"github.com/ricochet-im/ricochet-go/core/config"
+	"os"
+	ricochet "github.com/ricochet-im/ricochet-go/core"
+)
+
+var (
+	CONFIG_PATH string = "identity.json"
 )
 
 
@@ -30,6 +37,33 @@ func GetOnionAddress(privateKey string) string {
 	return addr
 }
 
+/*************** ricochet-go *****************/
+
+// https://stackoverflow.com/questions/33815541/golang-gomobile-app-cannot-generate-files
+// Writing and reading from files should apparently work if
+// <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+// is in the manifest and gomobile build is using hte manifest
+
+func StartBackend() error {
+	cfg, err := config.LoadConfigFile(CONFIG_PATH)
+	if err != nil && os.IsNotExist(err) {
+		cfg, err = config.NewConfigFile(CONFIG_PATH)
+	}
+	if err != nil {
+		return err
+	}
+	log.Println(cfg)
+
+	core := new(ricochet.Ricochet)
+	if err := core.Init(cfg); err != nil {
+		return err
+	}
+
+	log.Println("tor address: ", core.Config.Read().Identity)
+
+
+	return nil
+}
 
 
 /******** Testing by standing up an echobot ******/
