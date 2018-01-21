@@ -1,11 +1,9 @@
 package goRicochetMobile
 
 import (
-	"github.com/s-rah/go-ricochet/application"
 	"github.com/s-rah/go-ricochet/utils"
 	"log"
 	"net/http"
-	"time"
 	"github.com/yawning/bulb/utils/pkcs1"
 	"crypto/rsa"
 	"github.com/ricochet-im/ricochet-go/core/config"
@@ -76,6 +74,8 @@ func TestNet() (ok bool, ex error) {
 	return true, nil
 }
 
+// TODO: update EchoBot test
+/*
 func EchoBot(privateKeyData string)  {
 	privateKey, err := utils.ParsePrivateKey([]byte(privateKeyData))
 	if err != nil {
@@ -97,4 +97,4 @@ func EchoBot(privateKeyData string)  {
 	})
 	log.Printf("echobot started on %s", l.Addr().String())
 	echobot.Run(l)
-}
+}*/
